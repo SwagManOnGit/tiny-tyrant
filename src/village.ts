@@ -666,6 +666,36 @@ export class VillageView {
     this.setGoal(x + (dx / d) * stop, z + (dz / d) * stop);
   }
   private isInside(x: number, z: number): boolean { return Math.abs(x) < WALL && Math.abs(z) < WALL; }
+  /** Corner waypoints for walking round the outside of the walls when a straight line would cut through them. */
+  private detour(a: { x: number; z: number }, b: { x: number; z: number }): THREE.Vector3[] {
+    const hb = WALL + this.outerMargin() + 0.2;
+    const cuts = (p: { x: number; z: number }, q: { x: number; z: number }) => {
+      const n = Math.max(2, Math.ceil(Math.hypot(q.x - p.x, q.z - p.z)));
+      for (let i = 1; i < n; i++) {
+        const x = p.x + ((q.x - p.x) * i) / n, z = p.z + ((q.z - p.z) * i) / n;
+        if (Math.abs(x) < hb && Math.abs(z) < hb) return true;
+      }
+      return false;
+    };
+    if (!cuts(a, b)) return [];
+    const c = hb + 1.3;
+    const corners = [{ x: c, z: c }, { x: c, z: -c }, { x: -c, z: -c }, { x: -c, z: c }];
+    let best: { x: number; z: number }[] = [];
+    let bestLen = Infinity;
+    for (let i = 0; i < 4; i++) {
+      for (const dir of [1, -1]) {
+        for (let k = 1; k <= 3; k++) {
+          const path: { x: number; z: number }[] = [];
+          for (let j = 0; j < k; j++) path.push(corners[(i + dir * j + 8) % 4]);
+          if (cuts(a, path[0]) || cuts(path[k - 1], b)) continue;
+          let len = Math.hypot(path[0].x - a.x, path[0].z - a.z) + Math.hypot(b.x - path[k - 1].x, b.z - path[k - 1].z);
+          for (let j = 1; j < k; j++) len += Math.hypot(path[j].x - path[j - 1].x, path[j].z - path[j - 1].z);
+          if (len < bestLen) { bestLen = len; best = path; }
+        }
+      }
+    }
+    return best.map(p => new THREE.Vector3(p.x, 0, p.z));
+  }
   private outerMargin(): number { return this.envStage >= 5 ? 5.8 : 1.1; }
   private setGoal(x: number, z: number): void {
     const m = this.outerMargin() + 0.3;
@@ -678,9 +708,13 @@ export class VillageView {
       }
     }
     const from = this.isInside(this.kingPos.x, this.kingPos.z), to = this.isInside(x, z);
-    const gin = new THREE.Vector3(0, 0, WALL - 2.6), gout = new THREE.Vector3(0, 0, WALL + m + 0.9);
-    this.kingPath = from === to ? [] : from ? [gin, gout] : [gout, gin];
-    this.kingPath.push(new THREE.Vector3(x, 0, z));
+    const gin = new THREE.Vector3(0, 0, WALL - 2.6), gout = new THREE.Vector3(0, 0, WALL + m + 2.4);
+    const goal = new THREE.Vector3(x, 0, z);
+    if (from && to) this.kingPath = [];
+    else if (from) this.kingPath = [gin, gout, ...this.detour(gout, goal)];
+    else if (to) this.kingPath = [...this.detour(this.kingPos, gout), gout, gin];
+    else this.kingPath = this.detour(this.kingPos, goal);
+    this.kingPath.push(goal);
     this.kingGoal = this.kingPath.shift()!;
     this.marker.position.set(x, 0.06, z);
     this.marker.visible = true;
