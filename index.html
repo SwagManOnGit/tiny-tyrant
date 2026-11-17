@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#6ec3f4" />
+    <title>Tiny Tyrant</title>
+    <meta name="description" content="Tiny Tyrant: build a cartoon medieval village, raise an army and conquer the neighbours, then the world. A YouTube Playable concept by Swag Games." />
+    <!-- YouTube Playables SDK: must be the first script. It is a no-op outside YouTube. -->
+    <script src="https://www.youtube.com/game_api/v1"></script>
+    <script type="module" src="./src/main.ts"></script>
+    <style>
+      html, body { margin: 0; height: 100%; background: #6ec3f4; overflow: hidden; }
+      .boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-family: system-ui, sans-serif; color: #fff; background: linear-gradient(#6ec3f4, #b8e6ff); }
+      .boot-title { font-size: 44px; font-weight: 800; text-shadow: 0 3px 0 #2b5c8a; }
+      .boot-sub { margin-top: 8px; font-size: 16px; opacity: .9; }
+    </style>
+  </head>
+  <body>
+    <canvas id="gl"></canvas>
+    <div id="app"></div>
+    <div id="boot" class="boot">
+      <div class="boot-title">Tiny Tyrant</div>
+      <div class="boot-sub">Polishing the crown...</div>
+    </div>
+  </body>
+</html>

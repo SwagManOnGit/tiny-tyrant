@@ -1,0 +1,24 @@
+{
+  "name": "tiny-tyrant",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "bundle": "npm run build && node scripts/zip.mjs",
+    "balance": "esbuild scripts/balance.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/balance.mjs --log-level=warning && node node_modules/.cache/balance.mjs",
+    "pacing": "esbuild scripts/pacing.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/pacing.mjs --log-level=warning && node node_modules/.cache/pacing.mjs"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/fredoka": "^5.1.0",
+    "@fontsource-variable/grenze-gotisch": "^5.3.0",
+    "@types/three": "0.170.0",
+    "typescript": "^5.6.0",
+    "vite": "^7.0.0"
+  }
+}
